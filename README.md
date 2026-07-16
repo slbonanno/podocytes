@@ -70,7 +70,92 @@ review (with Claude) to arrive at the 4 datasets below.
 
 A separate notebook was made to process the raw data from each of the 4 studies into a separate Seurat object
 
+## Dataset 1: GSE209781
 
+**Samples:**
+```r
+sample_dirs <- c(
+  NM01  = "data/raw/GSE209781/NM01",
+  NM02  = "data/raw/GSE209781/NM02",
+  NM03  = "data/raw/GSE209781/NM03",
+  DKD01 = "data/raw/GSE209781/DKD01",
+  DKD02 = "data/raw/GSE209781/DKD02",
+  DKD03 = "data/raw/GSE209781/DKD03"
+)
+```
+
+### Empty droplet removal
+
+Loaded NM01 first as a test: 6,794,880 raw barcodes → 26,266 "real" cells
+via `emptyDrops()`. Still much higher than the ~5k cells/sample the paper
+reported — threshold for calling a good cell was too permissive at that
+stage. Loaded into Seurat to look more carefully.
+
+This revealed a lot of retained cells that weren't usable for analysis.
+Still, `emptyDrops()` alone was a necessary first step — Seurat was
+freezing trying to process the full 6.8M raw barcodes directly, so
+dropping empty droplets first was required just to make the data
+tractable before further filtering. The above was exploratory (one
+sample, by hand); once understood, all 6 samples were processed together.
+
+### Standard filtering + merge
+
+Ran `emptyDrops()` per sample, then standard Seurat QC filtering
+(min genes/cell, max % mito) on each, then merged all 6 into one Seurat
+object with sample and condition (healthy/DKD) labels attached.
+
+### Clustering (whole dataset)
+
+`JoinLayers()` → `NormalizeData()` → `FindVariableFeatures()` →
+`ScaleData()` → PCA. Elbow plot showed 10 PCs was a reasonable cutoff.
+`FindNeighbors()` → `FindClusters()` → `RunUMAP()`.
+
+![UMAP - all clusters](results/GSE209781_UMAP_clusters.png)
+*Clustering on all data (disease + control, 3 samples each) yields 17
+clusters.*
+
+### Technical validation
+
+Checked sample of origin, % mitochondrial, % ribosomal, and nCount_RNA
+(depth proxy) across the UMAP.
+
+![Technical validation grid](results/GSE209781_tech_validation_grid.png)
+*Checking for batch/technical drivers of clustering.*
+
+### Podocyte marker overlay (whole dataset)
+
+![Podocyte marker grid](results/GSE209781_podocyte_markers_grid.png)
+*Some podocyte markers show low expression across the dataset overall
+(PODXL, THSD7A, SYNPO shown; ACTB as expression control) — but these
+still point to one "island" of clusters off to the side of the main UMAP
+as the likely podocyte population.*
+
+### Subclustering
+
+Pulled out the candidate podocyte clusters and reclustered them alone.
+
+![Podocyte subcluster UMAP](results/GSE209781_podocyte_subcluster_UMAP.png)
+*Reclustering just the candidate podocyte clusters yields 12 new
+clusters, including several "islands" not resolved in the full-dataset
+clustering.*
+
+### Technical validation (subcluster)
+
+Same checks as before, run on the podocyte-only subset.
+
+![Podocyte subcluster technical validation](results/GSE209781_podocyte_subcluster_tech_validation_grid.png)
+*Cluster 3 (top) may be unique to healthy samples, though not consistently
+across all 3 healthy replicates. Most other subclusters show a mix of
+samples. Good starting point for defining sets/subsetting criteria for
+healthy-vs-disease DE going forward.*
+
+### Podocyte marker overlay (subcluster)
+
+![Podocyte subcluster marker grid](results/GSE209781_podocyte_subcluster_all_markers_grid.png)
+*NPHS1 is low-expressed across the whole dataset, but NPHS2 is robust
+across all podocyte subclusters. PODXL is also a broad marker; the
+remaining markers show expression to a lesser, more cluster-restricted
+extent.*
 
 
 
