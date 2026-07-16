@@ -73,7 +73,8 @@ A separate notebook was made to process the raw data from each of the 4 studies 
 ## Dataset 1: GSE209781
 
 **Samples:**
-Healthy: NM01, NM02, NM03
+Healthy: NM01, NM02, NM03.
+
 Diabetic Kidney Disease: DKD01, DKD02, DKD03
 
 ### Empty droplet removal
