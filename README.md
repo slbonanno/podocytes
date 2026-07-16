@@ -73,16 +73,8 @@ A separate notebook was made to process the raw data from each of the 4 studies 
 ## Dataset 1: GSE209781
 
 **Samples:**
-```r
-sample_dirs <- c(
-  NM01  = "data/raw/GSE209781/NM01",
-  NM02  = "data/raw/GSE209781/NM02",
-  NM03  = "data/raw/GSE209781/NM03",
-  DKD01 = "data/raw/GSE209781/DKD01",
-  DKD02 = "data/raw/GSE209781/DKD02",
-  DKD03 = "data/raw/GSE209781/DKD03"
-)
-```
+Healthy: NM01, NM02, NM03
+Diabetic Kidney Disease: DKD01, DKD02, DKD03
 
 ### Empty droplet removal
 
